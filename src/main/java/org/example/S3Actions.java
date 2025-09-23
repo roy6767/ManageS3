@@ -4,6 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -23,24 +24,30 @@ public class S3Actions {
     private String bucketName;
 
     public S3Actions() {
-        Dotenv dotenv = Dotenv.load();
+        AwsCredentialsProvider credentialsProvider;
+        String region;
 
-        String accessKey = dotenv.get("AWS_ACCESS_KEY");
-        String secretKey = dotenv.get("AWS_SECRET_KEY");
-        String region = dotenv.get("AWS_REGION", "eu-north-1"); // default region
+        try {
+            Dotenv dotenv = Dotenv.load();
 
-        if (accessKey == null || secretKey == null) {
-            throw new RuntimeException("AWS_ACCESS_KEY or AWS_SECRET_KEY not found in .env file.");
+            String accessKey = dotenv.get("AWS_ACCESS_KEY");
+            String secretKey = dotenv.get("AWS_SECRET_KEY");
+            region = dotenv.get("AWS_REGION", "eu-north-1");
+
+            if (accessKey != null && secretKey != null) {
+                credentialsProvider = () -> AwsBasicCredentials.create(accessKey, secretKey);
+            } else {
+                credentialsProvider = DefaultCredentialsProvider.create();
+            }
+
+        } catch (Exception e) {
+            credentialsProvider = DefaultCredentialsProvider.create();
+            region = "eu-north-1"; // default region
         }
 
         this.s3Client = S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(new AwsCredentialsProvider() {
-                    @Override
-                    public AwsCredentials resolveCredentials() {
-                        return AwsBasicCredentials.create(accessKey, secretKey);
-                    }
-                })
+                .credentialsProvider(credentialsProvider)
                 .build();
     }
 

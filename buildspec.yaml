@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+    commands:
+      - echo "Installationsfas klar. Verifierar Maven-version."
+      - mvn -v
+
+  pre_build:
+    commands:
+      - echo "Påbörjar pre-build-fasen."
+
+  build:
+    commands:
+      - echo "Bygger applikationen..."
+      - mvn clean package -DskipTests
+
+  post_build:
+    commands:
+      - echo "Bygget är slutfört. CodeBuild kommer nu att ladda upp artefakten till S3."
+
+artifacts:
+  files:
+    - 'target/*.jar'
+  discard-paths: yes
