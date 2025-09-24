@@ -186,13 +186,11 @@ public class S3Actions {
         }
 
         try {
-            // Get all objects from bucket
             ListObjectsV2Request request = ListObjectsV2Request.builder()
                     .bucket(bucketName)
                     .build();
             ListObjectsV2Response response = s3Client.listObjectsV2(request);
 
-            // Filter keys by substring (case-insensitive optional)
             return response.contents().stream()
                     .map(S3Object::key)
                     .filter(key -> key.toLowerCase().contains(keyword.toLowerCase()))

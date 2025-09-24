@@ -5,21 +5,21 @@ phases:
     runtime-versions:
       java: corretto21
     commands:
-      - echo "Installationsfas klar. Verifierar Maven-version."
+      - echo
       - mvn -v
 
   pre_build:
     commands:
-      - echo "Påbörjar pre-build-fasen."
+      - echo
 
   build:
     commands:
-      - echo "Bygger applikationen..."
+      - echo
       - mvn clean package -DskipTests
 
   post_build:
     commands:
-      - echo "Bygget är slutfört. CodeBuild kommer nu att ladda upp artefakten till S3."
+      - echo
 
 artifacts:
   files:
